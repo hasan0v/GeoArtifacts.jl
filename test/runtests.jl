@@ -12,6 +12,9 @@ using Test
 
     gtb = GADM.get("ISR", depth=1)
     @test length(gtb.geometry) == 7
+
+    @test_throws ArgumentError GADM.download("ZZZ")
+    @test_throws ArgumentError GADM.download("BRA"; version=v"9.9")
   end
 
   @testset "NaturalEarth" begin
@@ -220,6 +223,113 @@ using Test
     gtb = NaturalEarth.prismashadedrelief()
     @test gtb.geometry isa Grid
     @test paramdim(gtb.geometry) == 2
+
+    @testset "variant validation" begin
+      badscale = "1:999"
+
+      @test_throws ArgumentError NaturalEarth.download(badscale, "", "")
+
+      for variant in (
+        "nolakes", "iso", "toplevel", "ARG", "BDG", "BRA", "CHN", "EGY",
+        "FRA", "DEU", "GRC", "IDN", "IND", "ISO", "ISR", "ITA", "JPN",
+        "KOR", "MAR", "NEP", "NLD", "PAK", "POL", "PRT", "PSE", "RUS",
+        "SAU", "ESP", "SWE", "TUR", "TWN", "GBR", "USA", "UKR", "VNM"
+      )
+        @test_throws ArgumentError NaturalEarth.countries(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.countries("unknown")
+
+      for variant in ("mapunit", "maritme", "maritimechn", "pacific")
+        @test_throws ArgumentError NaturalEarth.borders(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.borders("unknown")
+
+      for variant in ("ranks", "nolakes", "borders")
+        @test_throws ArgumentError NaturalEarth.states(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.states("unknown")
+
+      for variant in ("nolakes", "ranks", "ranksislands")
+        @test_throws ArgumentError NaturalEarth.counties(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.counties("unknown")
+
+      @test_throws ArgumentError NaturalEarth.populatedplaces("simple"; scale=badscale)
+      @test_throws ArgumentError NaturalEarth.populatedplaces("unknown")
+
+      @test_throws ArgumentError NaturalEarth.roads("northamerica"; scale=badscale)
+      @test_throws ArgumentError NaturalEarth.roads("unknown")
+
+      @test_throws ArgumentError NaturalEarth.railroads("northamerica"; scale=badscale)
+      @test_throws ArgumentError NaturalEarth.railroads("unknown")
+
+      for variant in ("ranks",)
+        @test_throws ArgumentError NaturalEarth.lands(variant; scale=badscale)
+        @test_throws ArgumentError NaturalEarth.oceans(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.lands("unknown")
+      @test_throws ArgumentError NaturalEarth.minorislands("coastline"; scale=badscale)
+      @test_throws ArgumentError NaturalEarth.minorislands("unknown")
+      @test_throws ArgumentError NaturalEarth.oceans("unknown")
+
+      for variant in ("ranks", "australia", "europe", "northamerica")
+        @test_throws ArgumentError NaturalEarth.rivers(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.rivers("unknown")
+
+      for variant in ("historic", "pluvial", "australia", "europe", "northamerica")
+        @test_throws ArgumentError NaturalEarth.lakes(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.lakes("unknown")
+
+      for variant in ("points", "elevationpoints", "marineareas")
+        @test_throws ArgumentError NaturalEarth.physicallabels(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.physicallabels("unknown")
+
+      @test_throws ArgumentError NaturalEarth.iceshelves("borders"; scale=badscale)
+      @test_throws ArgumentError NaturalEarth.iceshelves("unknown")
+
+      for variant in ("0", "200", "1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000")
+        @test_throws ArgumentError NaturalEarth.bathymetry(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.bathymetry("unknown")
+
+      for variant in ("1", "5", "10", "15", "20", "30", "boundingbox")
+        @test_throws ArgumentError NaturalEarth.graticules(variant; scale=badscale)
+      end
+      @test_throws ArgumentError NaturalEarth.graticules("unknown")
+
+      for size in ("large", "medium", "small")
+        @test_throws ArgumentError NaturalEarth.hypsometrictints(scale=badscale, size=size)
+        @test_throws ArgumentError NaturalEarth.naturalearth1(scale=badscale, size=size)
+        @test_throws ArgumentError NaturalEarth.naturalearth2(scale=badscale, size=size)
+        @test_throws ArgumentError NaturalEarth.shadedrelief(scale=badscale, size=size)
+        @test_throws ArgumentError NaturalEarth.grayearth(scale=badscale, size=size)
+      end
+
+      for variant in ("relief", "water", "drainages")
+        @test_throws ArgumentError NaturalEarth.naturalearth1(variant; scale=badscale)
+        @test_throws ArgumentError NaturalEarth.naturalearth2(variant; scale=badscale)
+      end
+
+      for variant in ("relief", "water", "drainages", "oceanbottom")
+        @test_throws ArgumentError NaturalEarth.hypsometrictints(variant; scale=badscale)
+        @test_throws ArgumentError NaturalEarth.grayearth(variant; scale=badscale)
+      end
+
+      @test_throws ArgumentError NaturalEarth.hypsometrictints(size="unknown")
+      @test_throws ArgumentError NaturalEarth.hypsometrictints("unknown")
+      @test_throws ArgumentError NaturalEarth.naturalearth1(size="unknown")
+      @test_throws ArgumentError NaturalEarth.naturalearth1("unknown")
+      @test_throws ArgumentError NaturalEarth.naturalearth2(size="unknown")
+      @test_throws ArgumentError NaturalEarth.naturalearth2("unknown")
+      @test_throws ArgumentError NaturalEarth.shadedrelief(size="unknown")
+      @test_throws ArgumentError NaturalEarth.grayearth(size="unknown")
+      @test_throws ArgumentError NaturalEarth.grayearth("unknown")
+
+      @test NaturalEarth.rreaddir(mktempdir()) == String[]
+    end
   end
 
   @testset "GeoBR" begin
@@ -346,5 +456,9 @@ using Test
     # gtb = GeoBR.healthregion()
     # @test gtb.geometry isa GeometrySet
     # @test paramdim(gtb.geometry) == 2
+
+    @test_throws ArgumentError GeoBR.download("metadata.csv"; version=v"9.9.9")
+    @test_throws ArgumentError GeoBR.metadata(version=v"9.9.9")
+    @test_throws ArgumentError GeoBR.get("not-a-geobr-entity", 2020)
   end
 end
