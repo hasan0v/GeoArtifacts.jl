@@ -50,7 +50,7 @@ function load(; kwargs...)
   end
 
   path = joinpath(dir, "meuse.csv")
-  GeoIO.load(path; kwargs...)
+  GeoIO.load(path; coords=("x", "y"), kwargs...)
 end
 
 end
