@@ -30,7 +30,7 @@ using DataDeps
 (Down)load the Meuse dataset and return a `GeoTable`.
 `kwargs` are passed to the `GeoIO.load` function.
 """
-function load(; kwargs...)
+function load(; coords=("x", "y"), kwargs...)
   ID = "Meuse"
   url = "https://raw.githubusercontent.com/mhaffner/data/master/meuse.csv"
   
@@ -50,7 +50,7 @@ function load(; kwargs...)
   end
 
   path = joinpath(dir, "meuse.csv")
-  GeoIO.load(path; coords=("x", "y"), kwargs...)
+  GeoIO.load(path; coords=coords, kwargs...)
 end
 
 end
