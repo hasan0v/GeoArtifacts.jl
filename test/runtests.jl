@@ -461,4 +461,10 @@ using Test
     @test_throws ArgumentError GeoBR.metadata(version=v"9.9.9")
     @test_throws ArgumentError GeoBR.get("not-a-geobr-entity", 2020)
   end
+
+  @testset "Meuse" begin
+    gtb = Meuse.load()
+    @test length(gtb.geometry) == 155
+    @test paramdim(gtb.geometry) == 0
+  end
 end
